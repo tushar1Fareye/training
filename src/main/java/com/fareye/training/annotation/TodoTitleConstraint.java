@@ -1,4 +1,4 @@
-package com.fareye.training.Annotation;
+package com.fareye.training.annotation;
 
 
 import javax.validation.Constraint;

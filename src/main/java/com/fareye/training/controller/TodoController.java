@@ -25,7 +25,7 @@ public class TodoController {
             return new ResponseEntity<>("user with given email doesn't exist", HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>("todo with given field values created", HttpStatus.OK);
+        return new ResponseEntity<>("todo with given details created", HttpStatus.OK);
 
     }
 
@@ -65,10 +65,5 @@ public class TodoController {
         return new ResponseEntity<>("todo with given title for user with given email modified", HttpStatus.OK);
     }
 
-
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> exception(MethodArgumentNotValidException exception) {
-        return new ResponseEntity<>("Request validation failed", HttpStatus.BAD_REQUEST);
-    }
 
 }

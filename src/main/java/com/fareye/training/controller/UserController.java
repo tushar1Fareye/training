@@ -2,10 +2,13 @@ package com.fareye.training.controller;
 
 import com.fareye.training.model.User;
 import com.fareye.training.service.UserService;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 
 @RestController
@@ -16,25 +19,25 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody User user) {
+    public ResponseEntity<Object> create(@RequestBody @Valid User user) throws ParseException {
 
         if(userService.add(user)  == false) {
             return new ResponseEntity<>("User with given email already exist", HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>("user with given field values created", HttpStatus.OK);
+        return new ResponseEntity<>("user with given details created", HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<Object> fetch(@RequestParam String email) {
 
-        User requiredUser = userService.get(email);
+        User requestedUser = userService.get(email);
 
-        if(requiredUser == null) {
+        if(requestedUser == null) {
             return new ResponseEntity<>("User with given email doesn't exist", HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(requiredUser, HttpStatus.OK);
+        return new ResponseEntity<>(requestedUser, HttpStatus.OK);
 
     }
 

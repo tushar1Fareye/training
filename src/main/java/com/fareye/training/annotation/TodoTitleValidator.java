@@ -1,9 +1,7 @@
-package com.fareye.training.Annotation;
+package com.fareye.training.annotation;
 
 import com.fareye.training.model.Todo;
 import com.fareye.training.service.TodoService;
-import com.fareye.training.utility.EncryptionUtil;
-import org.apache.commons.beanutils.BeanUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
