@@ -1,18 +1,19 @@
 package com.fareye.training.utility;
 
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.security.SecureRandom;
 
 public class EncryptionUtil {
 
-    static Base64 base64 = new Base64();
+    static int strength = 10; // work factor of bcrypt
+    static BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(strength, new SecureRandom());
 
-    public static String encodeString(String rawString) {
-        return new String(base64.encode(rawString.getBytes()));
+    public static String encodePassword(String plainPassword) {
+        return bCryptPasswordEncoder.encode(plainPassword);
     }
 
-    public static String decodeString(String encodedString) {
-        return new String(base64.decode(encodedString.getBytes()));
-    }
 
 
 }

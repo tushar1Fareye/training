@@ -6,19 +6,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 
 @Getter @Setter @TodoTitleConstraint
 public class Todo {
-    @JsonFormat(pattern = "yyyy-mm-dd")
-    private Date dueDate;
 
-    @JsonFormat(pattern = "yyyy-mm-dd")
-    private Date createdDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dueDate;
 
-    @JsonFormat(pattern = "yyyy-mm-dd")
-    private Date modifiedDate;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdDate;
+
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime modifiedDate;
 
     private String body;
 

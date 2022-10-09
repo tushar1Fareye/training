@@ -1,45 +1,74 @@
 package com.fareye.training.service;
 
 import com.fareye.training.model.Todo;
-import com.fareye.training.utility.EncryptionUtil;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TodoService {
 
     public static HashMap<String, List<Todo>> userToTodosMap = new HashMap<>();
 
-    public List<Todo> getTodosByEmail(String email) throws InvocationTargetException, IllegalAccessException {
-        List<Todo> todos = userToTodosMap.get(email);
-        List<Todo> encryptedPasswordTodos = new ArrayList<>();
+    @Autowired
+    private UserService userService;
 
-        for(Todo todo: todos) {
-            Todo encryptedPasswordTodo = new Todo();
-            BeanUtils.copyProperties(encryptedPasswordTodo, todo);
-            encryptedPasswordTodo.getUser().setPassword(EncryptionUtil.decodeString(todo.getUser().getPassword()));
-            encryptedPasswordTodos.add(encryptedPasswordTodo);
-        }
+    public List<Todo> get(String email) {
 
-        return encryptedPasswordTodos;
+        return userToTodosMap.get(email);
+
     }
 
-    public List<Todo> addTodo(Todo todo) {
+    public Boolean add(Todo todo) {
 
-        todo.getUser().setPassword(EncryptionUtil.encodeString(todo.getUser().getPassword()));
+        String email = todo.getUser().getEmail();
+        List<Todo> todos = userToTodosMap.get(email);
 
-        List<Todo> todos = userToTodosMap.get(todo.getUser().getEmail());
-
-        if(todos == null) {
-            todos = new ArrayList<>();
+        if( todos != null) {
+            todo.setUser(userService.get(email));
+            todos.add(todo);
+            return true;
         }
 
-        todos.add(todo);
-        userToTodosMap.put(todo.getUser().getEmail(), todos);
-        return todos;
+        return false;
+    }
+
+    public Boolean delete(String email, String title) {
+
+        List<Todo> todos = get(email);
+
+        if(!CollectionUtils.isEmpty(todos)) {
+
+            List<Todo> filteredTodos = todos.stream().filter(Todo -> !title.equals(Todo.getTitle()))
+                    .collect(Collectors.toList());
+
+            if(todos.size() != filteredTodos.size()) {
+                userToTodosMap.put(email, filteredTodos);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Boolean update(Todo todoModifications) throws InvocationTargetException, IllegalAccessException {
+
+        List<Todo> todos = get(todoModifications.getUser().getEmail());
+
+        if(!CollectionUtils.isEmpty(todos)) {
+            for(Todo todo: todos) {
+                if(todo.getTitle().equals(todoModifications.getTitle())) {
+                    BeanUtils.copyProperties(todo, todoModifications);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
