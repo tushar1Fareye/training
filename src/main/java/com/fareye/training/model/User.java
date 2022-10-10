@@ -43,11 +43,11 @@ public class User {
     @Value("true")
     private Boolean isActive;
 
-    private String GithubUserName;
+    private String githubUserName;
 
-    private String GithubToken;
+    private String githubToken;
 
-    private String GithubPhoto;
+    private String githubPhoto;
 
     public void setCreated(LocalDateTime created) {
         this.created = LocalDateTime.now();
