@@ -11,7 +11,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<Object> methodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        return new ResponseEntity<>("invalid fields", HttpStatus.BAD_REQUEST);
+
+        return new ResponseEntity<>("invalid fields", HttpStatus.FORBIDDEN);
     }
 
 }

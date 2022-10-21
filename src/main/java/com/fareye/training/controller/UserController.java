@@ -12,6 +12,7 @@ import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/users")
 public class UserController {
 
@@ -27,11 +28,17 @@ public class UserController {
 
         return new ResponseEntity<>("user with given details created", HttpStatus.OK);
     }
+    @GetMapping(value = "/all")
+    public ResponseEntity<Object> fetchUsers() {
+
+        return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
+
+    }
 
     @GetMapping
-    public ResponseEntity<Object> fetch(@RequestParam String email) {
+    public ResponseEntity<Object> fetchUser(@RequestParam String email) {
 
-        User requestedUser = userService.get(email);
+        User requestedUser = userService.getUser(email);
 
         if(requestedUser == null) {
             return new ResponseEntity<>("User with given email doesn't exist", HttpStatus.BAD_REQUEST);
@@ -53,7 +60,7 @@ public class UserController {
 
     @PutMapping
     public ResponseEntity<Object> modify(@RequestBody User user) throws InvocationTargetException,
-            IllegalAccessException {
+            IllegalAccessException, ParseException {
 
         if(userService.update(user) == false) {
             return new ResponseEntity<>("User with given email doesn't exist", HttpStatus.BAD_REQUEST);

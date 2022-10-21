@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public class UserService {
 
     private List<User> users = new ArrayList<>();
 
-    public User get(String email) {
+    public User getUser(String email) {
 
         List<User> filteredUsers = users.stream().filter(User -> email.equals(User.getEmail()))
                 .collect(Collectors.toList());
@@ -35,11 +36,16 @@ public class UserService {
 
     }
 
+    public List<User> getUsers() {
+        return users;
+    }
+
     public Boolean add(User user) throws ParseException {
 
-        User filteredUser = get(user.getEmail());
+        User filteredUser = getUser(user.getEmail());
 
         if(filteredUser == null) {
+            user.setCreated(LocalDateTime.now());
             user.setGithubPhoto(getGithubPhotoUrl(user));
             users.add(user);
             TodoService.userToTodosMap.put(user.getEmail(), new ArrayList<>());
@@ -64,11 +70,18 @@ public class UserService {
         return false;
     }
 
-    public Boolean update(User userModifications) throws InvocationTargetException, IllegalAccessException {
+    public Boolean update(User userModifications) throws InvocationTargetException, IllegalAccessException, ParseException {
 
         for(User user: users) {
             if(user.getEmail().equals(userModifications.getEmail())) {
-                BeanUtils.copyProperties(user, userModifications);
+                user.setModified(LocalDateTime.now());
+                user.setFirstName(userModifications.getFirstName());
+                user.setLastName(userModifications.getLastName());
+                user.setPassword(userModifications.getPassword());
+                user.setRole(userModifications.getRole());
+                user.setGithubUserName(userModifications.getGithubUserName());
+                user.setGithubToken(userModifications.getGithubToken());
+                user.setGithubPhoto(getGithubPhotoUrl(user));
                 return true;
             }
         }

@@ -30,9 +30,10 @@ public class Todo {
     @Value("Incomplete")
     private String status;
 
+    @NotNull
+    private String userEmail;
+
+
     private User user;
 
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = LocalDateTime.now();
-    }
 }

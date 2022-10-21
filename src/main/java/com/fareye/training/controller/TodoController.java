@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/todos")
 public class TodoController {
 

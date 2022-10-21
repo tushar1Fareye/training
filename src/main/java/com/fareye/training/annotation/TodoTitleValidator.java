@@ -16,8 +16,7 @@ public class TodoTitleValidator implements ConstraintValidator<TodoTitleConstrai
     @Override
     public boolean isValid(Todo todo,
                            ConstraintValidatorContext cxt) {
-
-        List<Todo> todos = TodoService.userToTodosMap.get(todo.getUser().getEmail());
+        List<Todo> todos = TodoService.userToTodosMap.get(todo.getUserEmail());
 
         if(todos == null) {
             return true;
