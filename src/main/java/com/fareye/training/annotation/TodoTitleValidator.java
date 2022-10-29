@@ -1,13 +1,18 @@
 package com.fareye.training.annotation;
 
 import com.fareye.training.model.Todo;
+import com.fareye.training.repository.TodoRepository;
 import com.fareye.training.service.TodoService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.List;
 
 public class TodoTitleValidator implements ConstraintValidator<TodoTitleConstraint, Todo> {
+
+    @Autowired
+    TodoRepository todoRepository;
 
     @Override
     public void initialize(TodoTitleConstraint TodoTitle) {
@@ -16,17 +21,13 @@ public class TodoTitleValidator implements ConstraintValidator<TodoTitleConstrai
     @Override
     public boolean isValid(Todo todo,
                            ConstraintValidatorContext cxt) {
-        List<Todo> todos = TodoService.userToTodosMap.get(todo.getUserEmail());
 
-        if(todos == null) {
+        if(todoRepository ==null) {
             return true;
         }
 
-        for(Todo todo1: todos) {
-            if(todo.getTitle().equals(todo1.getTitle())) {
-                System.out.println("yes");
-                return false;
-            }
+        if (!todoRepository.findByTitleAndUserEmail(todo.getTitle(), todo.getUserEmail()).isEmpty()) {
+            return false;
         }
 
         return true;

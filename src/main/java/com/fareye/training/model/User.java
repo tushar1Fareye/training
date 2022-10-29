@@ -2,17 +2,22 @@ package com.fareye.training.model;
 
 import com.fareye.training.utility.EncryptionUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
-
+import lombok.*;
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 
-@Getter @Setter
+
+@Data
+@Entity
+@Table(name = "users")
 public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @NotNull
     private String firstName;
@@ -25,7 +30,6 @@ public class User {
             flags = Pattern.Flag.CASE_INSENSITIVE)
     private String email;
 
-    @Value("false")
     private Boolean isVerified;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -40,7 +44,6 @@ public class User {
     @NotNull
     private  String role;
 
-    @Value("true")
     private Boolean isActive;
 
     private String githubUserName;

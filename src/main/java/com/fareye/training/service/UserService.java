@@ -1,11 +1,11 @@
 package com.fareye.training.service;
 
 import com.fareye.training.model.User;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.collections.CollectionUtils;
+import com.fareye.training.repository.UserRepository;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,15 +21,15 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    private List<User> users = new ArrayList<>();
+    @Autowired
+    UserRepository userRepository;
 
     public User getUser(String email) {
 
-        List<User> filteredUsers = users.stream().filter(User -> email.equals(User.getEmail()))
-                .collect(Collectors.toList());
+        List<User> userList = userRepository.findByEmail(email);
 
-        if(!CollectionUtils.isEmpty(filteredUsers)) {
-            return filteredUsers.get(0);
+        if(!userList.isEmpty()) {
+            return userList.get(0);
         }
 
         return null;
@@ -37,18 +37,15 @@ public class UserService {
     }
 
     public List<User> getUsers() {
-        return users;
+        return userRepository.findAll();
     }
 
     public Boolean add(User user) throws ParseException {
 
-        User filteredUser = getUser(user.getEmail());
-
-        if(filteredUser == null) {
+        if(getUser(user.getEmail()) == null) {
             user.setCreated(LocalDateTime.now());
             user.setGithubPhoto(getGithubPhotoUrl(user));
-            users.add(user);
-            TodoService.userToTodosMap.put(user.getEmail(), new ArrayList<>());
+            userRepository.save(user);
             return true;
         }
 
@@ -58,12 +55,10 @@ public class UserService {
 
     public Boolean delete(String email) {
 
-        List<User> filteredUsers = users.stream().filter(User -> !email.equals(User.getEmail()))
-                .collect(Collectors.toList());
+        User user = getUser(email);
 
-        if(users.size() != filteredUsers.size()) {
-            TodoService.userToTodosMap.remove(email);
-            users = filteredUsers;
+        if(user != null) {
+            userRepository.deleteById(user.getId());
             return true;
         }
 
@@ -72,18 +67,18 @@ public class UserService {
 
     public Boolean update(User userModifications) throws InvocationTargetException, IllegalAccessException, ParseException {
 
-        for(User user: users) {
-            if(user.getEmail().equals(userModifications.getEmail())) {
-                user.setModified(LocalDateTime.now());
-                user.setFirstName(userModifications.getFirstName());
-                user.setLastName(userModifications.getLastName());
-                user.setPassword(userModifications.getPassword());
-                user.setRole(userModifications.getRole());
-                user.setGithubUserName(userModifications.getGithubUserName());
-                user.setGithubToken(userModifications.getGithubToken());
-                user.setGithubPhoto(getGithubPhotoUrl(user));
-                return true;
-            }
+        User user = getUser(userModifications.getEmail());
+        if(user != null) {
+            user.setModified(LocalDateTime.now());
+            user.setFirstName(userModifications.getFirstName());
+            user.setLastName(userModifications.getLastName());
+            user.setPassword(userModifications.getPassword());
+            user.setRole(userModifications.getRole());
+            user.setGithubUserName(userModifications.getGithubUserName());
+            user.setGithubToken(userModifications.getGithubToken());
+            user.setGithubPhoto(getGithubPhotoUrl(user));
+            userRepository.save(user);
+            return true;
         }
 
         return false;
@@ -91,26 +86,29 @@ public class UserService {
 
     private String getGithubPhotoUrl(User user) throws ParseException {
 
-        if(user.getGithubUserName() != null && user.getGithubToken() != null) {
+        try {
+            if (user.getGithubUserName() != null && user.getGithubToken() != null) {
 
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Accept", "application/vnd.github+json");
-            headers.set("Authorization", "Bearer " + user.getGithubToken());
-            String resourceUrl
-                    = "https://api.github.com/users/" + user.getGithubUserName();
-            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-            ResponseEntity<String> response = restTemplate.exchange(
-                    resourceUrl, HttpMethod.GET, requestEntity, String.class);
+                RestTemplate restTemplate = new RestTemplate();
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Accept", "application/vnd.github+json");
+                headers.set("Authorization", "Bearer " + user.getGithubToken());
+                String resourceUrl
+                        = "https://api.github.com/users/" + user.getGithubUserName();
+                HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+                ResponseEntity<String> response = restTemplate.exchange(
+                        resourceUrl, HttpMethod.GET, requestEntity, String.class);
 
-            String body = response.getBody();
-            JSONParser jsonParser = new JSONParser();
-            Object jsonObj = jsonParser.parse(body);
-            JSONObject jsonObject = (JSONObject) jsonObj;
-            return (String) jsonObject.get("avatar_url");
+                String body = response.getBody();
+                JSONParser jsonParser = new JSONParser();
+                Object jsonObj = jsonParser.parse(body);
+                JSONObject jsonObject = (JSONObject) jsonObj;
+                return (String) jsonObject.get("avatar_url");
 
+            }
+        } catch (Exception e) {
+            System.out.println("Github Api fetch fail");
         }
-
         return null;
     }
 
